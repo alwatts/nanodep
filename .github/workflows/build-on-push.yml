@@ -1,0 +1,42 @@
+name: 'Build on Push'
+
+on: push
+
+jobs:
+
+  build:
+    strategy:
+      matrix:
+        arch: [ amd64, arm64 ]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.19
+
+    - name: Install dependencies
+      run: |
+        go get ./cmd/depserver
+        go get ./cmd/depsyncer
+        go get ./cmd/deptokens
+
+    - name: Build
+      run: |
+        GOOS=linux GOARCH=${{ matrix.arch }} go build -o depserver -v ./cmd/depserver && \
+        GOOS=linux GOARCH=${{ matrix.arch }} go build -o depsyncer -v ./cmd/depsyncer && \
+        GOOS=linux GOARCH=${{ matrix.arch }} go build -o deptokens -v ./cmd/deptokens
+
+    - name: Upload build
+      uses: actions/upload-artifact@v3
+      with:
+        name: nanodep-linux-${{ matrix.arch }}
+        path: |
+          depserver
+          depsyncer
+          deptokens
+          storage/mysql/schema*
+          tools/*.sh
+          docs/dep-profile.example.json

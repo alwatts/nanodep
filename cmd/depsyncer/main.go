@@ -33,7 +33,7 @@ func main() {
 		flSDebug  = flag.Bool("debug-syncer", false, "additional debug logging of the device syncer")
 		flStorage = flag.String("storage", "file", "storage backend")
 		flDSN     = flag.String("storage-dsn", "", "storage data source name")
-		flWebhook = flag.String("webhook-url", "", "URL to send requests to")
+		flWebhook = flag.String("webhook-url", envString("NANODEP_WEBHOOK_URL", ""), "URL to send requests to")
 	)
 	flag.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(), "Usage: %s [flags] <DEPname1> [DEPname2 [...]]\nFlags:\n", os.Args[0])
@@ -195,4 +195,11 @@ func main() {
 	}
 
 	wg.Wait()
+}
+
+func envString(key, def string) string {
+	if env := os.Getenv(key); env != "" {
+		return env
+	}
+	return def
 }

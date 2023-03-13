@@ -35,7 +35,7 @@ func main() {
 	var (
 		flDebug   = flag.Bool("debug", false, "log debug messages")
 		flListen  = flag.String("listen", ":9001", "HTTP listen address")
-		flAPIKey  = flag.String("api", "", "API key for API endpoints")
+		flAPIKey  = flag.String("api", envString("NANODEP_API_KEY", ""), "API key for API endpoints")
 		flVersion = flag.Bool("version", false, "print version")
 		flStorage = flag.String("storage", "file", "storage backend")
 		flDSN     = flag.String("storage-dsn", "", "storage data source name")
@@ -130,4 +130,11 @@ func DelHeaderMiddleware(h http.Handler, header string) http.HandlerFunc {
 		r.Header.Del(header)
 		h.ServeHTTP(w, r)
 	}
+}
+
+func envString(key, def string) string {
+	if env := os.Getenv(key); env != "" {
+		return env
+	}
+	return def
 }
